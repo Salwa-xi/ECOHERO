@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recycling Game</title>
+    <style>
+      
+
+        body {
+            background-color: #024110;
+            font-size: 9px;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            width: 100vw;
+            position: fixed;
+        }
+
+        .game {
+            background-image: url('https://www.gheir.com/big/design-1-30-1-2020.jpg');
+            width: 620px;
+            height: 480px;
+            font-family: B04;
+            color: #deebdf;
+            position: relative;
+        }
+
+        .trashBins {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+        }
+
+        .trash {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 28%;
+        }
+
+        .trash img {
+            padding: 5px;
+            border: 2px solid #075511;
+        }
+
+        .messageBox {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(8, 51, 2, 0.938);
+            padding: 10px;
+            border-radius: 10px ;
+            display: none;
+            z-index: 1000;
+            text-align: center;
+            max-width: 250px;
+        }
+
+        .messageBox img {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 10px;
+        }
+
+        .messageBox p {
+            font-size: 14px;
+            color: #ffffff;
+            margin-top: 5px;
+        }
+
+        .container {
+            scale: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="game">
+            <div class="trash">
+                <img src="assets/trash/plastic/3.png">
+            </div>
+            <div class="trashBins">
+                <img name="glass" src="assets/bin1.png">
+                <img name="hazardous" src="assets/bin2.png">
+                <img name="metal" src="assets/bin3.png">
+                <img name="paper" src="assets/bin4.png">
+                <img name="plastic" src="assets/bin5.png">
+                <img name="organic" src="assets/bin6.png">
+            </div>
+
+            <div class="messageBox" style="display: none;">
+                <h1 id="messageText"></h1>
+                <img id="messageImage" src="">
+                <button id="replayBtn">Replay</button>
+            </div>
+
+        </div>
+    </div>
+    <script>
+        let trashDom = document.querySelector(".trash img");
+        let bins = document.querySelectorAll(".trashBins img");
+
+        let trashes = loadTrashes();
+        let trash = getRandomTrash();
+        trashDom.src = trash.src;
+        trashDom.name = trash.type;
+
+        let messageBox = document.querySelector(".messageBox");
+        let messageText = document.getElementById("messageText");
+        let messageImage = document.getElementById("messageImage");
+
+        let replayBtn = document.getElementById('replayBtn');
+
+        replayBtn.onclick = function(){
+            messageBox.style.display = 'none';
+            let trash = getRandomTrash();
+            trashDom.src = trash.src;
+            trashDom.name = trash.type;
+        };
+
+        bins.forEach(bin=>{
+            bin.addEventListener("dragover", dragTrashOverBin);
+            bin.addEventListener("drop", dropTrash);
+        });
+
+        function dragTrashOverBin(event){
+            event.preventDefault();
+        }
+
+        function dropTrash(event){
+            event.preventDefault();
+            bin = event.target;
+            if(trashDom.name == bin.name){
+                let recyclingInfo = getRecyclingInfo(trashDom.name);
+                messageText.innerHTML = recyclingInfo.textEnglish;
+                messageImage.src = recyclingInfo.image;
+                messageBox.style.display = 'block';
+            } else {
+                // No action if incorrect choice
+            }
+        }
+
+        function getRandomTrash(){
+            let randomIndex = Math.floor(Math.random() * trashes.length);
+            return trashes[randomIndex];
+        }
+
+        function loadTrashes(){
+            let trashes = [];
+            for(let i = 1 ; i <= 4; i++){
+                trashes.push({
+                    type: 'glass',
+                    src: `assets/trash/glass/${i}.png`
+                });
+                trashes.push({
+                    type: 'hazardous',
+                    src: `assets/trash/hazardous/${i}.png`
+                });
+                trashes.push({
+                    type: 'metal',
+                    src: `assets/trash/metal/${i}.png`
+                });
+                trashes.push({
+                    type: 'organic',
+                    src: `assets/trash/organic/${i}.png`
+                });
+                trashes.push({
+                    type: 'paper',
+                    src: `assets/trash/paper/${i}.png`
+                });
+                trashes.push({
+                    type: 'plastic',
+                    src: `assets/trash/plastic/${i}.png`
+                });
+            }
+            return trashes;
+        }
+
+        function getRecyclingInfo(type){
+            let info = {
+                glass: {
+                    textEnglish: "Well done! You've successfully recycled glass in Al-Ula, helping the community to preserve the environment and create new bottles.",
+                    image: "data:image/png;base64,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"
+                },
+                hazardous: {
+                    textEnglish: "Well done! You've safely processed hazardous waste in Al-Ula, protecting the environment.",
+                    image: "https://www.actenviro.com/wp-content/uploads/2020/12/31788-scaled-1.jpg"
+                },
+                metal: {
+                    textEnglish: "Well done! You've recycled metal in Al-Ula, helping to create new metal products.",
+                    image: "https://www.maine.gov/dep/waste/recycle/images/metalbecomes.jpg"
+                },
+                organic: {
+                    textEnglish: "Well done! You've composted organic waste in Al-Ula, contributing to fertilizer production.",
+                    image: "https://kelvinindia.in/blog/wp-content/uploads/2023/02/MACHINE-1-1024x887.jpg"
+                },
+                paper: {
+                    textEnglish: "Well done! You've recycled paper in Al-Ula, helping to create new paper.",
+                    image: "https://media.licdn.com/dms/image/D5612AQHwy1RoBOHCgw/article-inline_image-shrink_1000_1488/0/1695142248438?e=1722470400&v=beta&t=TCd3_NIF7vtq76vqa1oIbW6jaudqc-Wu3IaYpr69KXI"
+                },
+                plastic: {
+                    textEnglish: "Well done! You've recycled plastic in Al-Ula, helping to create new plastic products.",
+                    image: "https://indpro.com/blog/wp-content/uploads/2023/05/Plastics-recycling-process-768x432.jpg"
+                }
+            };
+            return info[type];
+        }
+    </script>
+</body>
+</html>
